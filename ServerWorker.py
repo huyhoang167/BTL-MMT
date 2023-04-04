@@ -10,10 +10,12 @@ class ServerWorker:
 	PAUSE = 'PAUSE'
 	TEARDOWN = 'TEARDOWN'
 	DESCRIBE = 'DESCRIBE'
+	SWITCH = 'SWITCH'
 
 	INIT = 0
 	READY = 1
 	PLAYING = 2
+	SWITCHING = 3
 	state = INIT
 
 	OK_200 = 0
@@ -52,7 +54,7 @@ class ServerWorker:
 		
 		# Process SETUP request
 		if requestType == self.SETUP:
-			if self.state == self.INIT:
+			if self.state == self.INIT or self.state == self.SWITCHING :
 				# Update state
 				print("processing SETUP\n")
 				
@@ -70,10 +72,10 @@ class ServerWorker:
 				
 				# Get the RTP/UDP port from the last line
 				self.clientInfo['rtpPort'] = request[2].split(' ')[3]
-		
+	
 		# Process PLAY request 		
 		elif requestType == self.PLAY:
-			if self.state == self.READY:
+			if self.state == self.READY or self.state == self.SWITCHING:
 				print("processing PLAY\n")
 				self.state = self.PLAYING
 				
@@ -111,6 +113,10 @@ class ServerWorker:
 			print("processing DESCRIBE\n")
 
 			self.replyRtsp(self.OK_200, seq[1], describe=True)
+		elif requestType == self.SWITCH:
+			print("processing SWITCH\n")
+			self.state = self.SWITCHING
+			self.replyRtsp(self.OK_200, seq[1],switch=True)
 
 	def sendRtp(self):
 		"""Send RTP packets over UDP."""
@@ -151,7 +157,7 @@ class ServerWorker:
 		
 		return rtpPacket.getPacket()
 		
-	def replyRtsp(self, code, seq, describe=False):
+	def replyRtsp(self, code, seq, describe=False,switch = False):
 		"""Send RTSP reply to the client."""
 		if code == self.OK_200:
 			#print("200 OK")
@@ -162,6 +168,13 @@ class ServerWorker:
 				reply += 'version=2\n'
 				reply += 'stream=video\n'
 				reply += 'type=mjpeg\n'
+			if switch:
+				reply += '\nAvailable video\n'
+				reply += 'Earth\n'
+				reply += 'Ocean\n'
+				reply += 'Flower\n'
+				reply += 'Cartoon\n'
+				reply += 'Movie\n'
 			connSocket = self.clientInfo['rtspSocket'][0]
 			connSocket.send(reply.encode())
 		# Error messages
