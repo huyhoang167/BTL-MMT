@@ -41,7 +41,8 @@ class Client:
         self.bytesReceived = 0
         self.startTime = 0
         self.lossCounter = 0
-        self.list_movie = [' ',' ',' ',' ',' ',' ']
+        self.list_movie = ["1","2","3","4","5","6"]
+        self.switch_flag = False
         # THIS GUI IS JUST FOR REFERENCE ONLY, STUDENTS HAVE TO CREATE THEIR OWN GUI 	
     def createWidgets(self):
         """Build GUI."""
@@ -127,6 +128,8 @@ class Client:
     def Switch(self):
         """Describe button handler."""
         self.sendRtspRequest(self.SWITCH)
+        while self.switch_flag == False:
+            pass
         self.top = Toplevel(self.master)
         self.top.geometry("350x400")
         self.top.title("Choose movie")
@@ -376,6 +379,7 @@ class Client:
             request += "Session: " + str(self.sessionId)
             # Keep track of the sent request.
             self.requestSent = self.SWITCH
+            self.switch_flag = False
         else:
             return
 
@@ -486,7 +490,8 @@ class Client:
                         for i in range(4, len(lines)):
                            self.list_movie[index_popup] = lines[i]
                            index_popup = index_popup + 1
-
+                        self.switch_flag = True;
+                        
     def openRtpPort(self):
         """Open RTP socket binded to a specified port."""
         #-------------
