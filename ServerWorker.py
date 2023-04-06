@@ -177,7 +177,6 @@ class ServerWorker:
 				reply += 'Movie\n'
 			connSocket = self.clientInfo['rtspSocket'][0]
 			connSocket.send(reply.encode())
-			print(reply)
 		# Error messages
 		elif code == self.FILE_NOT_FOUND_404:
 			print("404 NOT FOUND")
